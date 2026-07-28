@@ -1,0 +1,69 @@
+# --- Environment ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.coverage.*
+coverage/
+
+# --- Node / TypeScript ---
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# --- Rust ---
+desktop/src-tauri/target/
+target/
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+logs/
+*.log
+
+# --- Media / Data ---
+uploads/
+local-recordings/
+evidence/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# --- Secrets / Keys ---
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+
+# --- Docker ---
+.docker/
+
+# --- Generated ---
+.generated/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini

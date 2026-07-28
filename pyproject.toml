@@ -1,0 +1,124 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hotelops-ai"
+version = "0.1.0"
+description = "HotelOps AI — Operational intelligence platform for hospitality"
+requires-python = ">=3.14"
+authors = [
+    { name = "HotelOps AI Team" },
+]
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.34.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "sqlalchemy>=2.0.36",
+    "asyncpg>=0.30.0",
+    "redis>=5.2.0",
+    "boto3>=1.36.0",
+    "httpx>=0.28.0",
+]
+
+# =============================================================================
+# Ruff — Linter & Formatter
+# =============================================================================
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint]
+preview = true
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "RUF", # Ruff-specific
+]
+ignore = [
+    "line-too-long", # handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["invalid-function-name", "invalid-argument-name", "non-lowercase-variable-in-function", "unused-async"]
+"backend/app/api/**" = ["function-call-in-default-argument"]  # FastAPI Depends() is not a side-effect default
+"backend/app/main.py" = ["raise-without-from-inside-except", "fallible-context-manager"]  # lifespan pattern is correct for FastAPI
+"backend/app/api/routes/health.py" = ["function-call-in-default-argument"]  # FastAPI Depends() standard pattern
+
+[tool.ruff.lint.isort]
+known-first-party = ["hotelops"]
+
+# =============================================================================
+# mypy — Static Type Checking
+# =============================================================================
+[tool.mypy]
+strict = true
+python_version = "3.14"
+show_error_codes = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = false
+
+[[tool.mypy.overrides]]
+module = "backend.app.api.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "backend.app.main"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["boto3", "botocore", "botocore.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+# =============================================================================
+# pytest — Test Runner
+# =============================================================================
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+strict_markers = true
+markers = [
+    "unit: Fast isolated unit tests",
+    "contract: API/event/schema compatibility tests",
+    "integration: Database/Redis/storage integration tests",
+    "cv_regression: Video/cv regression tests",
+    "e2e: Full end-to-end workflow tests",
+    "security: Authorization/privacy/security tests",
+    "performance: Throughput/load/capacity tests",
+    "asyncio: async test marker for pytest-asyncio",
+]
+
+asyncio_mode = "auto"
+
+# =============================================================================
+# Coverage
+# =============================================================================
+[tool.coverage.run]
+source = ["backend"]
+omit = ["tests/*", ".venv/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

@@ -1,0 +1,17 @@
+# Code Owners
+#
+# Ownership areas are defined in docs/operations/ownership.md.
+# Repository hosting provider and team identifiers are TBD.
+# Customize the entries below once GitHub usernames or team aliases
+# are confirmed (e.g., @org/team or @username).
+#
+# Sensitive paths requiring review:
+#   /database/          — Database schema and migrations
+#   /contracts/         — Cross-module contracts
+#   /infrastructure/    — Docker, deployment, monitoring
+#   /video-intelligence/ — Computer vision core
+#   /desktop/src-tauri/  — Tauri native shell
+#   /docs/architecture/adr/ — Architecture decisions
+#   /.github/           — CI/CD configuration
+
+# * @org/team

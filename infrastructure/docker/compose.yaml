@@ -1,0 +1,104 @@
+# HotelOps AI — Local Development Infrastructure
+# =============================================================================
+# Pinned versions:
+#   timescaledb: 2.19.0-pg17  (TimescaleDB 2.19 on PostgreSQL 17)
+#   redis:       7.4-alpine    (Redis 7.4)
+#   minio:       latest        (MinIO CE — exact tags discontinued upstream)
+# =============================================================================
+# Note on MinIO: As of mid-2026, MinIO no longer publishes exact version
+# tags to Docker Hub for the community edition. Images are pinned via
+# SHA256 digest for reproducible deployments.
+
+name: hotelops-ai
+
+services:
+  postgres:
+    image: timescale/timescaledb:2.19.0-pg17
+    container_name: hotelops-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hotelops}
+      POSTGRES_USER: ${POSTGRES_USER:-hotelops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-CHANGE_ME}
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - hotelops-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hotelops} -d ${POSTGRES_DB:-hotelops}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hotelops-network
+
+  redis:
+    image: redis:7.4-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2
+    container_name: hotelops-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6380}:6379"
+    volumes:
+      - hotelops-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - hotelops-network
+
+  minio:
+    image: minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+    container_name: hotelops-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${OBJECT_STORAGE_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${OBJECT_STORAGE_SECRET_KEY:-minioadmin}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - hotelops-minio-data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hotelops-network
+
+  # One-shot bucket init — runs only until bucket exists
+  minio-init:
+    image: minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
+    container_name: hotelops-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${OBJECT_STORAGE_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${OBJECT_STORAGE_SECRET_KEY:-minioadmin}
+      BUCKET_NAME: ${OBJECT_STORAGE_BUCKET:-hotelops-development}
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 \"${MINIO_ROOT_USER:-minioadmin}\" \"${MINIO_ROOT_PASSWORD:-minioadmin}\" &&
+        mc mb local/\"${BUCKET_NAME:-hotelops-development}\" --ignore-existing &&
+        echo 'Bucket ready: ${BUCKET_NAME:-hotelops-development}' &&
+        exit 0
+      "
+    networks:
+      - hotelops-network
+
+volumes:
+  hotelops-postgres-data:
+  hotelops-redis-data:
+  hotelops-minio-data:
+
+networks:
+  hotelops-network:
+    driver: bridge
