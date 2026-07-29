@@ -1,0 +1,13 @@
+{
+  "track_id": "00000000-0000-0000-0000-000000000020",
+  "detection_id": "00000000-0000-0000-0000-000000000010",
+  "frame_id": "00000000-0000-0000-0000-000000000001",
+  "session_id": "00000000-0000-0000-0000-000000000002",
+  "schema_version": "1.0",
+  "event_time": "2026-07-29T12:00:00+00:00",
+  "track_state": "active",
+  "tracking_metadata": {
+    "tracker": "bytetrack",
+    "match_distance": 0.85
+  }
+}

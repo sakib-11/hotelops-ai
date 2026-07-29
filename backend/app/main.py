@@ -14,6 +14,14 @@ from fastapi import FastAPI
 
 from backend.app.api.router import api_router
 from backend.app.dependencies import get_settings
+from backend.app.infrastructure.auth.exceptions import (
+    AuthenticationError,
+    AuthorizationError,
+)
+from backend.app.infrastructure.auth.handler import (
+    authentication_error_handler,
+    authorization_error_handler,
+)
 from backend.app.state import app_state
 
 logger = logging.getLogger(__name__)
@@ -34,6 +42,10 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+# Register auth exception handlers — must be before routes
+app.add_exception_handler(AuthenticationError, authentication_error_handler)  # type: ignore[arg-type]
+app.add_exception_handler(AuthorizationError, authorization_error_handler)  # type: ignore[arg-type]
 
 app.include_router(api_router)  # type: ignore[arg-type]
 

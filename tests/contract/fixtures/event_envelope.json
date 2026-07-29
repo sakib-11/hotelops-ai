@@ -1,0 +1,14 @@
+{
+  "event_id": "00000000-0000-0000-0000-000000000030",
+  "event_type": "detection.observed",
+  "schema_version": "1.0",
+  "event_time": "2026-07-29T12:00:00+00:00",
+  "produced_at": "2026-07-29T12:00:01+00:00",
+  "correlation_id": "corr-abc-123",
+  "causation_id": null,
+  "source": "yolo.detector",
+  "payload": {
+    "detection_count": 3,
+    "class": "person"
+  }
+}

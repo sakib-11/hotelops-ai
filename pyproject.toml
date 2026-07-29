@@ -20,6 +20,8 @@ dependencies = [
     "redis>=5.2.0",
     "boto3>=1.36.0",
     "httpx>=0.28.0",
+    "alembic>=1.14.0",
+    "pyjwt>=2.9.0",
 ]
 
 # =============================================================================
@@ -52,6 +54,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["invalid-function-name", "invalid-argument-name", "non-lowercase-variable-in-function", "unused-async"]
 "backend/app/api/**" = ["function-call-in-default-argument"]  # FastAPI Depends() is not a side-effect default
+"backend/app/infrastructure/auth/deps.py" = ["function-call-in-default-argument", "unused-async"]  # FastAPI Depends() standard pattern; async needed for future DB lookup
+"backend/app/infrastructure/auth/handler.py" = ["unused-async"]  # FastAPI exception handlers must be async
 "backend/app/main.py" = ["raise-without-from-inside-except", "fallible-context-manager"]  # lifespan pattern is correct for FastAPI
 "backend/app/api/routes/health.py" = ["function-call-in-default-argument"]  # FastAPI Depends() standard pattern
 

@@ -1,0 +1,103 @@
+"""Canonical contracts for HotelOps AI.
+
+This package defines the stable, versioned vocabulary that connects
+every HotelOps AI module. All cross-module communication uses these
+canonical types. Do NOT redefine them inside consuming modules.
+"""
+
+# Re-export common primitives for convenient access
+# Re-export audit contracts
+from contracts.audit import AuditActionCategory, AuditEvent
+from contracts.common import (
+    SCHEMA_VERSION,
+    ActionCommandId,
+    AlertId,
+    AnalysisJobId,
+    ApprovalRequestId,
+    DetectionId,
+    EventId,
+    EvidenceId,
+    FindingId,
+    FrameId,
+    MembershipId,
+    OpportunityId,
+    RecommendationId,
+    RoleId,
+    TenantId,
+    TrackId,
+    UserId,
+    VenueId,
+    VideoAssetId,
+    VideoSessionId,
+    new_uuid,
+    parse_utc,
+    serialize_utc,
+    to_utc,
+    utc_now,
+    validate_schema_version,
+    validate_utc,
+)
+
+# Re-export identity/tenancy contracts
+from contracts.identity import (
+    ActorContext,
+    Membership,
+    MembershipScope,
+    MembershipStatus,
+    Permission,
+    Role,
+    RoleName,
+    Tenant,
+    TenantStatus,
+    User,
+    UserStatus,
+    Venue,
+    VenueStatus,
+    permissions_for_role,
+)
+
+__all__ = [
+    "SCHEMA_VERSION",
+    "ActionCommandId",
+    "ActorContext",
+    "AlertId",
+    "AnalysisJobId",
+    "ApprovalRequestId",
+    "AuditActionCategory",
+    "AuditEvent",
+    "DetectionId",
+    "EventId",
+    "EvidenceId",
+    "FindingId",
+    "FrameId",
+    "Membership",
+    "MembershipId",
+    "MembershipScope",
+    "MembershipStatus",
+    "OpportunityId",
+    "Permission",
+    "RecommendationId",
+    "Role",
+    "RoleId",
+    "RoleName",
+    "Tenant",
+    "TenantId",
+    "TenantStatus",
+    "TrackId",
+    "User",
+    "UserId",
+    "UserStatus",
+    "Venue",
+    "VenueId",
+    "VenueStatus",
+    "VideoAssetId",
+    "VideoSessionId",
+    "new_uuid",
+    "parse_utc",
+    "permissions_for_role",
+    "serialize_utc",
+    "to_utc",
+    "utc_now",
+    "validate_schema_version",
+    "validate_utc",
+]

@@ -59,6 +59,13 @@ class Settings(BaseSettings):
     ]
     object_storage_region: Annotated[str, Field(default="us-east-1", alias="OBJECT_STORAGE_REGION")]
 
+    # --- JWT / Authentication ---
+    secret_key: Annotated[str, Field(default="CHANGE_ME_IN_PRODUCTION", alias="SECRET_KEY")]
+    jwt_algorithm: Annotated[str, Field(default="HS256", alias="JWT_ALGORITHM")]
+    jwt_expiration_minutes: Annotated[
+        int, Field(default=60, alias="JWT_EXPIRATION_MINUTES", ge=1, le=43200)
+    ]
+
     @field_validator("app_env")
     @classmethod
     def validate_app_env(cls, v: str) -> str:

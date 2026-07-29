@@ -1,0 +1,19 @@
+{
+  "detection_id": "00000000-0000-0000-0000-000000000010",
+  "frame_id": "00000000-0000-0000-0000-000000000001",
+  "schema_version": "1.0",
+  "class_name": "person",
+  "confidence": 0.95,
+  "bounding_box": {
+    "x_min": 0.1,
+    "y_min": 0.2,
+    "x_max": 0.5,
+    "y_max": 0.8
+  },
+  "event_time": "2026-07-29T12:00:00+00:00",
+  "detector_metadata": {
+    "model": "yolov8",
+    "input_width": 640,
+    "input_height": 640
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "command_id": "00000000-0000-0000-0000-000000000120",
+  "schema_version": "1.0",
+  "approval_request_id": null,
+  "command_type": "notify_staff",
+  "parameters": {
+    "channel": "slack",
+    "message": "Please add front desk staff for morning shift",
+    "priority": "high"
+  },
+  "issued_at": "2026-07-29T12:35:00+00:00"
+}
