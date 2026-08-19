@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "queue_candidate",
+  "rule_version": "latest",
+  "rule_name": "",
+  "description": "Invalid golden fixture — must be rejected by RuleDefinition validation.",
+  "enabled": true,
+  "input_fact_types": [],
+  "configuration_requirements": [],
+  "evaluator_id": "",
+  "output_event_type": "queue_candidate",
+  "evidence_requirement": "required",
+  "cooldown_policy": {
+    "enabled": true,
+    "duration_seconds": 0.0
+  },
+  "deterministic_version": "0.2.0"
+}

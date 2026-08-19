@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "service_gap_candidate",
+  "rule_version": "v1",
+  "rule_name": "Service gap candidate",
+  "description": "Detects a service-gap candidate (currently disabled by configuration).",
+  "enabled": false,
+  "input_fact_types": [
+    "waiting_interval"
+  ],
+  "configuration_requirements": [
+    "service_gap_grace_seconds"
+  ],
+  "evaluator_id": "service_gap_evaluator.v1",
+  "output_event_type": "service_gap_candidate",
+  "evidence_requirement": "optional",
+  "cooldown_policy": {
+    "enabled": false,
+    "duration_seconds": 0.0
+  },
+  "deterministic_version": "0.2.0"
+}

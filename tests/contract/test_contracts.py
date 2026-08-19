@@ -18,6 +18,13 @@ from contracts.common import (
 from contracts.events import AnalysisJob, EventEnvelope, EvidenceRef, EvidenceType, JobStatus
 from contracts.intelligence import EvidencePackage, Finding, Priority, Recommendation
 from contracts.operations import ActionCommand, Alert, ApprovalRequest, ApprovalStatus, Severity
+from contracts.spatial import (
+    SPATIAL_ENGINE_VERSION,
+    SpatialObservation,
+    SpatialPointModel,
+    SpatialPointPolicy,
+    SpatialStatus,
+)
 from contracts.video import FramePacket, SourceType, VideoAsset, VideoSession
 from contracts.vision import BoundingBox, DetectionObservation, TrackObservation, TrackState
 
@@ -256,6 +263,93 @@ class TestTrackObservation:
 
 
 # =============================================================================
+# Spatial Contracts
+# =============================================================================
+
+
+class TestSpatialObservation:
+    """SpatialObservation serialization and validation."""
+
+    def test_minimal_construction(self) -> None:
+        obs = SpatialObservation(
+            session_id=UUID("00000000-0000-0000-0000-000000000002"),
+            track_id=UUID("00000000-0000-0000-0000-000000000020"),
+            frame_id=UUID("00000000-0000-0000-0000-000000000003"),
+            event_time=_utc(2026, 7, 29, 12, 0, 5),
+            camera_id=UUID("00000000-0000-0000-0000-000000000130"),
+            configuration_version_id=UUID("00000000-0000-0000-0000-000000000131"),
+            spatial_point=SpatialPointModel(
+                x=0.5,
+                y=0.9,
+                policy=SpatialPointPolicy.FOOTPOINT,
+            ),
+            status=SpatialStatus.INSIDE,
+            zone_profile_id="zone-lobby",
+        )
+        assert obs.schema_version == SCHEMA_VERSION
+        assert obs.spatial_point.policy == SpatialPointPolicy.FOOTPOINT
+        assert obs.engine_version == SPATIAL_ENGINE_VERSION
+
+    def test_serialize_round_trip(self) -> None:
+        original = SpatialObservation(
+            session_id=UUID("00000000-0000-0000-0000-000000000002"),
+            track_id=UUID("00000000-0000-0000-0000-000000000020"),
+            frame_id=UUID("00000000-0000-0000-0000-000000000003"),
+            event_time=_utc(2026, 7, 29, 12, 0, 5),
+            camera_id=UUID("00000000-0000-0000-0000-000000000130"),
+            configuration_version_id=UUID("00000000-0000-0000-0000-000000000131"),
+            spatial_point=SpatialPointModel(x=0.5, y=0.9, policy=SpatialPointPolicy.CENTROID),
+            status=SpatialStatus.AMBIGUOUS,
+        )
+        data = original.model_dump(mode="json")
+        restored = SpatialObservation.model_validate(data)
+        assert restored == original
+
+    def test_naive_event_time_rejected(self) -> None:
+        with pytest.raises(ValueError, match="naive"):
+            SpatialObservation(
+                session_id=UUID("00000000-0000-0000-0000-000000000002"),
+                track_id=UUID("00000000-0000-0000-0000-000000000020"),
+                frame_id=UUID("00000000-0000-0000-0000-000000000003"),
+                event_time=datetime(2026, 7, 29, 12, 0, 5),
+                camera_id=UUID("00000000-0000-0000-0000-000000000130"),
+                configuration_version_id=UUID("00000000-0000-0000-0000-000000000131"),
+                spatial_point=SpatialPointModel(x=0.5, y=0.9, policy=SpatialPointPolicy.FOOTPOINT),
+                status=SpatialStatus.INSIDE,
+            )
+
+    def test_extra_fields_rejected(self) -> None:
+        with pytest.raises(ValueError):
+            SpatialObservation.model_validate({
+                "schema_version": SCHEMA_VERSION,
+                "session_id": str(UUID("00000000-0000-0000-0000-000000000002")),
+                "track_id": str(UUID("00000000-0000-0000-0000-000000000020")),
+                "frame_id": str(UUID("00000000-0000-0000-0000-000000000003")),
+                "event_time": "2026-07-29T12:00:05+00:00",
+                "camera_id": str(UUID("00000000-0000-0000-0000-000000000130")),
+                "configuration_version_id": str(UUID("00000000-0000-0000-0000-000000000131")),
+                "spatial_point": {"x": 0.5, "y": 0.9, "policy": "footpoint"},
+                "status": "inside",
+                "unknown_field": "should_not_be_allowed",
+            })
+
+    def test_out_of_bounds_normalized_point_rejected(self) -> None:
+        with pytest.raises(ValueError, match="must lie in"):
+            SpatialPointModel(x=1.5, y=0.5, policy=SpatialPointPolicy.FOOTPOINT)
+
+    def test_venue_local_point_unbounded(self) -> None:
+        point = SpatialPointModel(
+            x=12.75,
+            y=8.25,
+            coordinate_space="venue_local",
+            policy=SpatialPointPolicy.FOOTPOINT,
+        )
+        from pytest import approx
+
+        assert point.x == approx(12.75)
+
+
+# =============================================================================
 # Event Contracts
 # =============================================================================
 
@@ -301,13 +395,16 @@ class TestEventEnvelope:
 
 
 class TestEvidenceRef:
-    """EvidenceRef serialization and validation."""
+    """EvidenceRef serialization and validation (Task 17.2 contract)."""
 
     def test_minimal_construction(self) -> None:
         ref = EvidenceRef(
             ref_id=UUID("00000000-0000-0000-0000-000000000040"),
             ref_type=EvidenceType.FRAME,
             ref_uri="00000000-0000-0000-0000-000000000003",
+            event_id=UUID("00000000-0000-0000-0000-000000000030"),
+            event_time=_utc(2026, 7, 29, 12, 0),
+            video_session_id=UUID("00000000-0000-0000-0000-000000000002"),
         )
         assert ref.schema_version == SCHEMA_VERSION
 
@@ -316,6 +413,8 @@ class TestEvidenceRef:
             ref_id=UUID("00000000-0000-0000-0000-000000000040"),
             ref_type=EvidenceType.OBJECT_STORAGE,
             ref_uri="s3://hotelops/evidence/video123.mp4",
+            event_id=UUID("00000000-0000-0000-0000-000000000030"),
+            event_time=_utc(2026, 7, 29, 12, 0),
             metadata={"duration_s": 120.0},
         )
         data = original.model_dump(mode="json")
@@ -328,6 +427,9 @@ class TestEvidenceRef:
                 ref_id=UUID("00000000-0000-0000-0000-000000000040"),
                 ref_type=EvidenceType.FRAME,
                 ref_uri="",
+                event_id=UUID("00000000-0000-0000-0000-000000000030"),
+                event_time=_utc(2026, 7, 29, 12, 0),
+                video_session_id=UUID("00000000-0000-0000-0000-000000000002"),
             )
 
 
@@ -442,6 +544,9 @@ class TestEvidencePackage:
             ref_id=UUID("00000000-0000-0000-0000-000000000040"),
             ref_type=EvidenceType.FRAME,
             ref_uri="frame://00000000-0000-0000-0000-000000000003",
+            event_id=UUID("00000000-0000-0000-0000-000000000030"),
+            event_time=_utc(2026, 7, 29, 12, 0),
+            video_session_id=UUID("00000000-0000-0000-0000-000000000002"),
         )
         pkg = EvidencePackage(
             package_id=UUID("00000000-0000-0000-0000-000000000070"),

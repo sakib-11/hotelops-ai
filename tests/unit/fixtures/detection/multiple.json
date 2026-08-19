@@ -1,0 +1,89 @@
+{
+  "config": {
+    "confidence_threshold": 0.5,
+    "input_height": 480,
+    "input_width": 640,
+    "max_detections": 300,
+    "nms_iou_threshold": 0.45
+  },
+  "description": "Three objects: two persons and one bag.",
+  "expected": {
+    "detection_count": 3,
+    "detections": [
+      {
+        "class_id": 0,
+        "class_name": "person",
+        "confidence": 0.9,
+        "x_max": 0.34375,
+        "x_min": 0.078125,
+        "y_max": 0.8958333333333334,
+        "y_min": 0.08333333333333333
+      },
+      {
+        "class_id": 1,
+        "class_name": "bag",
+        "confidence": 0.85,
+        "x_max": 0.65625,
+        "x_min": 0.46875,
+        "y_max": 0.625,
+        "y_min": 0.25
+      },
+      {
+        "class_id": 0,
+        "class_name": "person",
+        "confidence": 0.88,
+        "x_max": 0.953125,
+        "x_min": 0.703125,
+        "y_max": 0.8541666666666666,
+        "y_min": 0.125
+      }
+    ]
+  },
+  "height": 480,
+  "image": "multiple.png",
+  "kind": "image",
+  "model": {
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact_uri": "memory://golden/yolov8n.pt",
+    "class_names": [
+      "person",
+      "bag"
+    ],
+    "id": "yolo-person-detector",
+    "name": "yolov8n",
+    "version": "8.1.0"
+  },
+  "predictions": [
+    {
+      "class_id": 0,
+      "confidence": 0.9,
+      "x1": 50,
+      "x2": 220,
+      "y1": 40,
+      "y2": 430
+    },
+    {
+      "class_id": 1,
+      "confidence": 0.85,
+      "x1": 300,
+      "x2": 420,
+      "y1": 120,
+      "y2": 300
+    },
+    {
+      "class_id": 0,
+      "confidence": 0.88,
+      "x1": 450,
+      "x2": 610,
+      "y1": 60,
+      "y2": 410
+    }
+  ],
+  "scene": "multiple",
+  "schema": "hotelops.detection-scene/1.0",
+  "tolerances": {
+    "abs": 1e-09,
+    "rel": 1e-09
+  },
+  "width": 640
+}

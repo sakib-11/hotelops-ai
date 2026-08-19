@@ -35,6 +35,11 @@ class EventEnvelope[PayloadT](BaseModel, frozen=True):
     causation_id: str | None = None
     source: str = Field(min_length=1)
     payload: PayloadT
+    # Task 8.8 — async observability propagation (optional telemetry context;
+    # absent = no upstream trace = start a new trace).
+    trace_id: str | None = None
+    span_id: str | None = None
+    trace_sampled: bool | None = None
 
     _validate_schema = field_validator("schema_version")(validate_schema_version)
     _validate_event_time = field_validator("event_time")(validate_utc)

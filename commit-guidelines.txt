@@ -1,0 +1,12 @@
+Conventional commit guidelines (use in commit messages):
+
+- feat(scope): add new feature
+- fix(scope): bug fix
+- chore: housekeeping
+- docs: documentation changes
+- refactor: code change that neither fixes a bug nor adds a feature
+
+Examples:
+- feat(api): add user authentication
+- fix(ui): resolve overflow on mobile
+- chore(ci): add GitHub Actions workflow

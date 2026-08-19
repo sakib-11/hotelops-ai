@@ -84,3 +84,40 @@ class TestSettingsValidation:
         repr_str = repr(settings)
         assert "super_secret" not in repr_str
         assert "super_secret_key" not in repr_str
+
+
+class TestObservabilitySettings:
+    """Task 8 — typed observability configuration foundation."""
+
+    def test_telemetry_disabled_by_default(self) -> None:
+        """Safe dev defaults: no telemetry enabled, no external server needed."""
+        settings = Settings(_env_file=None)  # type: ignore[call-arg]
+        assert settings.observability_log_format == "json"
+        assert settings.observability_metrics_enabled is False
+        assert settings.observability_tracing_enabled is False
+        assert settings.otel_service_name == "hotelops-ai"
+        assert settings.otel_otlp_endpoint == "http://localhost:4318"
+        assert settings.otel_sample_ratio == pytest.approx(0.1)
+
+    def test_log_format_validation(self) -> None:
+        """OBSERVABILITY_LOG_FORMAT must be text or json."""
+        settings = Settings(_env_file=None, OBSERVABILITY_LOG_FORMAT="JSON")  # type: ignore[call-arg]
+        assert settings.observability_log_format == "json"
+        with pytest.raises(ValueError, match="OBSERVABILITY_LOG_FORMAT"):
+            Settings(_env_file=None, OBSERVABILITY_LOG_FORMAT="xml")  # type: ignore[call-arg]
+
+    def test_telemetry_toggles_and_sampling(self) -> None:
+        """Toggles are honored and sample ratio is bounded to [0, 1]."""
+        settings = Settings(  # type: ignore[call-arg]
+            _env_file=None,
+            OBSERVABILITY_METRICS_ENABLED="true",
+            OBSERVABILITY_TRACING_ENABLED="true",
+            OTEL_SAMPLE_RATIO="0.5",
+        )
+        assert settings.observability_metrics_enabled is True
+        assert settings.observability_tracing_enabled is True
+        assert settings.otel_sample_ratio == pytest.approx(0.5)
+        with pytest.raises(ValueError):
+            Settings(_env_file=None, OTEL_SAMPLE_RATIO=1.5)  # type: ignore[call-arg]
+        with pytest.raises(ValueError):
+            Settings(_env_file=None, OTEL_SAMPLE_RATIO=-0.1)  # type: ignore[call-arg]

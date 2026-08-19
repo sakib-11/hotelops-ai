@@ -1,0 +1,24 @@
+.main-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  background-color: var(--color-background-primary);
+  overflow: hidden;
+}
+
+.main-area-header {
+  flex-shrink: 0;
+}
+
+.main-area-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-6);
+}
+
+@media (max-width: 768px) {
+  .main-area-content {
+    padding: var(--spacing-4);
+  }
+}

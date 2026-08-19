@@ -1,0 +1,125 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-pill);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.badge--sm {
+  height: 20px;
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  gap: var(--spacing-xs);
+}
+
+.badge--md {
+  height: 24px;
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-size-label);
+  gap: var(--spacing-xs);
+}
+
+.badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: currentColor;
+}
+
+.badge__text {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.badge__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  margin-left: var(--spacing-xs);
+  transition:
+    opacity var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.badge__remove:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+.badge__remove svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.5;
+}
+
+/* Variants */
+.badge--default {
+  background-color: var(--color-surface-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.badge--primary {
+  background-color: var(--color-brand-primary-light);
+  color: var(--color-brand-primary-text);
+  border: 1px solid var(--color-pastel-lilac);
+}
+
+.badge--secondary {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-primary);
+}
+
+.badge--success {
+  background-color: var(--color-status-success-light);
+  color: var(--color-status-success-text);
+  border: 1px solid var(--color-status-success);
+}
+
+.badge--warning {
+  background-color: var(--color-status-warning-light);
+  color: var(--color-status-warning-text);
+  border: 1px solid var(--color-status-warning);
+}
+
+.badge--error {
+  background-color: var(--color-status-error-light);
+  color: var(--color-status-error-text);
+  border: 1px solid var(--color-status-error);
+}
+
+.badge--info {
+  background-color: var(--color-status-info-light);
+  color: var(--color-status-info-text);
+  border: 1px solid var(--color-status-info);
+}
+
+.badge--dot .badge__text::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  margin-right: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.badge--status {
+  font-weight: var(--font-weight-medium);
+}

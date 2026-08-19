@@ -12,8 +12,10 @@ from typing import TYPE_CHECKING
 from backend.app.infrastructure.config import Settings
 from backend.app.infrastructure.database.client import DatabaseClient
 from backend.app.infrastructure.logging import configure_logging
+from backend.app.infrastructure.observability import metrics, tracing
 from backend.app.infrastructure.redis.client import RedisClient
-from backend.app.infrastructure.storage.client import StorageClient
+from backend.app.infrastructure.storage.protocol import StoragePort
+from backend.app.infrastructure.storage.s3_adapter import S3StorageAdapter
 
 if TYPE_CHECKING:
     from backend.app.infrastructure.health.service import ReadinessService
@@ -28,7 +30,7 @@ class ApplicationState:
         self.settings: Settings | None = None
         self.database: DatabaseClient | None = None
         self.redis: RedisClient | None = None
-        self.storage: StorageClient | None = None
+        self.storage: StoragePort | None = None
         self.readiness: ReadinessService | None = None
 
     async def initialize(self) -> None:
@@ -37,7 +39,11 @@ class ApplicationState:
 
         self.settings = Settings()  # type: ignore[call-arg]
 
-        configure_logging(self.settings.log_level)
+        configure_logging(self.settings.log_level, settings=self.settings)
+        # Task 8.7 — OpenTelemetry tracing (opt-in; no-op while disabled).
+        tracing.configure_tracing(self.settings)
+        # Task 8.11 — Prometheus metrics (opt-in; no-op while disabled).
+        metrics.configure_metrics(self.settings)
         logger.info(
             "Starting %s v%s (%s)",
             self.settings.app_name,
@@ -54,9 +60,14 @@ class ApplicationState:
         await self.redis.initialize()
         logger.info("Redis client initialized")
 
-        self.storage = StorageClient(self.settings)
-        await self.storage.initialize()
-        logger.info("Storage client initialized")
+        storage_adapter = S3StorageAdapter(self.settings)
+        await storage_adapter.initialize()
+        self.storage = storage_adapter
+        logger.info("Storage adapter initialized")
+
+        if self.database is None or self.redis is None or self.storage is None:
+            msg = "Infrastructure initialization failed"
+            raise RuntimeError(msg)
 
         self.readiness = ReadinessService(self.database, self.redis, self.storage)
         logger.info("Application state initialized")
@@ -73,6 +84,9 @@ class ApplicationState:
 
         if self.database is not None:
             await self.database.dispose()
+
+        # Flush any buffered spans after all infrastructure has shut down.
+        tracing.shutdown_tracing()
 
         if self.settings is not None:
             logger.info(

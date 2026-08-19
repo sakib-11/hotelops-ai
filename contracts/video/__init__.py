@@ -2,6 +2,7 @@
 
 from contracts.video.models import (
     FramePacket,
+    LiveVideoSessionStatus,
     SourceType,
     VideoAsset,
     VideoSession,
@@ -9,6 +10,7 @@ from contracts.video.models import (
 
 __all__ = [
     "FramePacket",
+    "LiveVideoSessionStatus",
     "SourceType",
     "VideoAsset",
     "VideoSession",

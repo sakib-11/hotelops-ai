@@ -1,0 +1,89 @@
+{
+  "config": {
+    "confidence_threshold": 0.5,
+    "input_height": 480,
+    "input_width": 640,
+    "max_detections": 300,
+    "nms_iou_threshold": 0.45
+  },
+  "description": "Objects touching the exact frame edges (boundary normalization).",
+  "expected": {
+    "detection_count": 3,
+    "detections": [
+      {
+        "class_id": 0,
+        "class_name": "person",
+        "confidence": 0.8,
+        "x_max": 1.0,
+        "x_min": 0.0,
+        "y_max": 1.0,
+        "y_min": 0.0
+      },
+      {
+        "class_id": 1,
+        "class_name": "bag",
+        "confidence": 0.75,
+        "x_max": 0.5,
+        "x_min": 0.0,
+        "y_max": 0.75,
+        "y_min": 0.25
+      },
+      {
+        "class_id": 0,
+        "class_name": "person",
+        "confidence": 0.7,
+        "x_max": 1.0,
+        "x_min": 0.5,
+        "y_max": 1.0,
+        "y_min": 0.0
+      }
+    ]
+  },
+  "height": 480,
+  "image": "boundary.png",
+  "kind": "image",
+  "model": {
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact_uri": "memory://golden/yolov8n.pt",
+    "class_names": [
+      "person",
+      "bag"
+    ],
+    "id": "yolo-person-detector",
+    "name": "yolov8n",
+    "version": "8.1.0"
+  },
+  "predictions": [
+    {
+      "class_id": 0,
+      "confidence": 0.8,
+      "x1": 0,
+      "x2": 640,
+      "y1": 0,
+      "y2": 480
+    },
+    {
+      "class_id": 1,
+      "confidence": 0.75,
+      "x1": 0,
+      "x2": 320,
+      "y1": 120,
+      "y2": 360
+    },
+    {
+      "class_id": 0,
+      "confidence": 0.7,
+      "x1": 320,
+      "x2": 640,
+      "y1": 0,
+      "y2": 480
+    }
+  ],
+  "scene": "boundary",
+  "schema": "hotelops.detection-scene/1.0",
+  "tolerances": {
+    "abs": 1e-09,
+    "rel": 1e-09
+  },
+  "width": 640
+}

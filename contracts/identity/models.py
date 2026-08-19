@@ -115,6 +115,7 @@ class Permission(StrEnum):
 
     # Evidence
     EVIDENCE_READ = "evidence.read"
+    EVIDENCE_MANAGE = "evidence.manage"
 
     # Recommendation
     RECOMMENDATION_READ = "recommendation.read"
@@ -142,6 +143,7 @@ _ROLE_PERMISSIONS: dict[RoleName, frozenset[Permission]] = {
         Permission.VIDEO_ANALYZE,
         Permission.ANALYTICS_READ,
         Permission.EVIDENCE_READ,
+        Permission.EVIDENCE_MANAGE,
         Permission.RECOMMENDATION_READ,
         Permission.RECOMMENDATION_MANAGE,
         Permission.ALERT_READ,
@@ -157,6 +159,7 @@ _ROLE_PERMISSIONS: dict[RoleName, frozenset[Permission]] = {
         Permission.VIDEO_ANALYZE,
         Permission.ANALYTICS_READ,
         Permission.EVIDENCE_READ,
+        Permission.EVIDENCE_MANAGE,
         Permission.RECOMMENDATION_READ,
         Permission.RECOMMENDATION_MANAGE,
         Permission.ALERT_READ,

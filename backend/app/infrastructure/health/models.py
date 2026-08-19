@@ -50,3 +50,6 @@ class HealthResponse(BaseModel):
     status: str = Field(default="ok", description="Application liveness status")
     service: str = Field(description="Service name")
     version: str = Field(description="Application version")
+    environment: str | None = Field(default=None, description="Deployment environment")
+    build_commit: str | None = Field(default=None, description="Git commit hash")
+    build_timestamp: str | None = Field(default=None, description="Build timestamp")

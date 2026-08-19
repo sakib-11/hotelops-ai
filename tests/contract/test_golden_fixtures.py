@@ -8,11 +8,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from pytest import approx
 
 from contracts.events import EventEnvelope
 from contracts.intelligence import EvidencePackage, Recommendation
 from contracts.operations import ActionCommand
+from contracts.rules import RuleDefinition
+from contracts.spatial import SpatialObservation
 from contracts.video import FramePacket
 from contracts.vision import DetectionObservation, TrackObservation
 
@@ -73,6 +76,13 @@ class TestGoldenFixtures:
         assert cmd.command_type == "notify_staff"
         assert cmd.parameters["channel"] == "slack"
 
+    def test_spatial_observation_fixture(self) -> None:
+        data = _load_fixture("spatial_observation.json")
+        obs = SpatialObservation.model_validate(data)
+        assert obs.status.value == "inside"
+        assert obs.zone_profile_id == "zone-lobby"
+        assert obs.spatial_point.policy.value == "footpoint"
+
     def test_all_fixtures_deserialize(self) -> None:
         """Every JSON file in the fixtures directory deserializes without error."""
         fixture_files = sorted(FIXTURES_DIR.glob("*.json"))
@@ -87,6 +97,11 @@ class TestGoldenFixtures:
             "evidence_package.json": EvidencePackage,
             "recommendation.json": Recommendation,
             "action_command.json": ActionCommand,
+            "spatial_observation.json": SpatialObservation,
+            "rule_definition_v1.json": RuleDefinition,
+            "rule_definition_v2.json": RuleDefinition,
+            "rule_definition_disabled.json": RuleDefinition,
+            "rule_definition_with_config.json": RuleDefinition,
         }
 
         for fixture_path in fixture_files:
@@ -109,3 +124,66 @@ class TestGoldenFixtures:
         assert set(serialized.keys()) == set(data.keys())
         assert serialized["frame_id"] == data["frame_id"]
         assert serialized["frame_index"] == data["frame_index"]
+
+
+class TestRuleGoldenFixtures:
+    """Task 16.2 golden fixtures — versioned RuleDefinition compatibility."""
+
+    def test_v1_fixture(self) -> None:
+        data = _load_fixture("rule_definition_v1.json")
+        rule = RuleDefinition.model_validate(data)
+        assert rule.rule_id == "queue_candidate"
+        assert rule.rule_version == "v1"
+        assert rule.enabled is True
+        assert rule.canonical_identity == "queue_candidate:v1"
+        assert "waiting_qualification_seconds" in rule.configuration_requirements
+        # Static fixture: no dynamic timestamps; deterministic version pinned.
+        assert rule.deterministic_version == "0.2.0"
+
+    def test_v2_fixture(self) -> None:
+        data = _load_fixture("rule_definition_v2.json")
+        rule = RuleDefinition.model_validate(data)
+        assert rule.rule_id == "queue_candidate"
+        assert rule.rule_version == "v2"
+        assert rule.canonical_identity == "queue_candidate:v2"
+        # v2 is a DISTINCT immutable definition — never overwrites v1.
+        assert "queue_max_length" in rule.configuration_requirements
+        assert rule.evaluator_id == "queue_candidate_evaluator.v2"
+
+    def test_disabled_fixture(self) -> None:
+        data = _load_fixture("rule_definition_disabled.json")
+        rule = RuleDefinition.model_validate(data)
+        assert rule.enabled is False
+        # A disabled rule is still a valid, resolvable definition.
+        assert rule.rule_version == "v1"
+        assert rule.canonical_identity == "service_gap_candidate:v1"
+
+    def test_with_config_fixture(self) -> None:
+        data = _load_fixture("rule_definition_with_config.json")
+        rule = RuleDefinition.model_validate(data)
+        assert rule.rule_id == "turnover_delay"
+        assert rule.configuration_requirements == frozenset({
+            "turnover_delay_seconds",
+            "service_window_seconds",
+        })
+        assert rule.input_fact_types == frozenset({"occupancy_snapshot", "dwell_interval"})
+
+    def test_invalid_fixture_rejected(self) -> None:
+        # The invalid fixture lives in the invalid/ subdirectory so the
+        # top-level all-deserialize check never sees it.
+        path = FIXTURES_DIR / "invalid" / "rule_definition_invalid.json"
+        data = json.loads(path.read_text())
+        with pytest.raises(ValueError):
+            RuleDefinition.model_validate(data)
+
+    def test_fixtures_round_trip_identically(self) -> None:
+        """Every valid rule fixture survives serialize → deserialize."""
+        for name in (
+            "rule_definition_v1.json",
+            "rule_definition_v2.json",
+            "rule_definition_disabled.json",
+            "rule_definition_with_config.json",
+        ):
+            data = _load_fixture(name)
+            rule = RuleDefinition.model_validate(data)
+            assert RuleDefinition.model_validate(rule.model_dump(mode="json")) == rule

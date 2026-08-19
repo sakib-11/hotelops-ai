@@ -58,7 +58,7 @@ class TestPermissionDefinitions:
             assert matching_read, f"{mp} has no corresponding read permission"
 
     def test_no_unknown_permissions(self) -> None:
-        """Only the 14 canonical permissions should exist."""
+        """Only the 15 canonical permissions should exist."""
         known_values = {
             "venue.read",
             "venue.manage",
@@ -66,6 +66,7 @@ class TestPermissionDefinitions:
             "video.analyze",
             "analytics.read",
             "evidence.read",
+            "evidence.manage",
             "recommendation.read",
             "recommendation.manage",
             "alert.read",
@@ -109,9 +110,9 @@ class TestRolePermissionMapping:
         perms = permissions_for_role(RoleName.ADMIN)
         assert Permission.VIDEO_ANALYZE in perms
 
-    def test_admin_has_all_14_permissions(self) -> None:
+    def test_admin_has_all_15_permissions(self) -> None:
         perms = permissions_for_role(RoleName.ADMIN)
-        assert len(perms) == 14
+        assert len(perms) == 15
 
     def test_admin_not_denied_any(self) -> None:
         """ADMIN should have every canonical permission."""
@@ -154,7 +155,7 @@ class TestRolePermissionMapping:
 
     def test_manager_permission_count(self) -> None:
         perms = permissions_for_role(RoleName.MANAGER)
-        assert len(perms) == 9
+        assert len(perms) == 10
 
     # ------------------------------------------------------------------ #
     # OPERATOR — 6 read-only permissions

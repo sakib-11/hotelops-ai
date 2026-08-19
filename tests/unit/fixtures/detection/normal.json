@@ -1,0 +1,55 @@
+{
+  "config": {
+    "confidence_threshold": 0.5,
+    "input_height": 480,
+    "input_width": 640,
+    "max_detections": 300,
+    "nms_iou_threshold": 0.45
+  },
+  "description": "One clear person detection in the middle of the frame.",
+  "expected": {
+    "detection_count": 1,
+    "detections": [
+      {
+        "class_id": 0,
+        "class_name": "person",
+        "confidence": 0.93,
+        "x_max": 0.515625,
+        "x_min": 0.015625,
+        "y_max": 0.9791666666666666,
+        "y_min": 0.041666666666666664
+      }
+    ]
+  },
+  "height": 480,
+  "image": "normal.png",
+  "kind": "image",
+  "model": {
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact_uri": "memory://golden/yolov8n.pt",
+    "class_names": [
+      "person",
+      "bag"
+    ],
+    "id": "yolo-person-detector",
+    "name": "yolov8n",
+    "version": "8.1.0"
+  },
+  "predictions": [
+    {
+      "class_id": 0,
+      "confidence": 0.93,
+      "x1": 10,
+      "x2": 330,
+      "y1": 20,
+      "y2": 470
+    }
+  ],
+  "scene": "normal",
+  "schema": "hotelops.detection-scene/1.0",
+  "tolerances": {
+    "abs": 1e-09,
+    "rel": 1e-09
+  },
+  "width": 640
+}

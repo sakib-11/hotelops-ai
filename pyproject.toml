@@ -22,6 +22,36 @@ dependencies = [
     "httpx>=0.28.0",
     "alembic>=1.14.0",
     "pyjwt>=2.9.0",
+    # Task 8 — observability foundation (all optional at runtime; see
+    # OBSERVABILITY_* settings). Structured JSON logging uses only the
+    # stdlib logging + json modules (no dependency required).
+    # Metrics: Prometheus client library — pure Python, no external
+    # server required to start; /metrics exposition is Task 8.3+.
+    "prometheus-client>=0.21.0",
+    # OpenTelemetry tracing API + SDK. The API is a safe no-op until an
+    # SDK/exporter is initialized; the app never contacts an OTLP
+    # endpoint unless OBSERVABILITY_TRACING_ENABLED=true (default off),
+    # so no external telemetry server is required to start.
+    "opentelemetry-api>=1.30.0",
+    "opentelemetry-sdk>=1.30.0",
+    # OTLP/HTTP exporter for OpenTelemetry tracing (Task 8.7). Imported
+    # LAZILY only when OBSERVABILITY_TRACING_ENABLED=true — the app never
+    # contacts the endpoint while disabled, and startup does not require
+    # a collector to be running.
+    "opentelemetry-exporter-otlp-proto-http>=1.30.0",
+]
+
+[project.optional-dependencies]
+# Deterministic CV runtime (Task 12 detectors + Task 13 tracker). These are
+# the packages the yolo/bytetrack adapters refer to as the "cv" extras.
+# They are ALWAYS lazily imported behind the provider boundaries and NEVER
+# required for the core application to start or run — the adapters raise a
+# typed, actionable error when they are missing.
+cv = [
+    "numpy>=1.26.0",
+    "opencv-python-headless>=4.9.0",
+    "ultralytics>=8.2.0",
+    "bytetrack>=0.1.0",
 ]
 
 # =============================================================================
@@ -54,6 +84,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["invalid-function-name", "invalid-argument-name", "non-lowercase-variable-in-function", "unused-async"]
 "backend/app/api/**" = ["function-call-in-default-argument"]  # FastAPI Depends() is not a side-effect default
+"backend/app/domain/configuration/validation/validators.py" = ["unused-async"]  # uniform async interface for VALIDATOR_STAGES orchestration
 "backend/app/infrastructure/auth/deps.py" = ["function-call-in-default-argument", "unused-async"]  # FastAPI Depends() standard pattern; async needed for future DB lookup
 "backend/app/infrastructure/auth/handler.py" = ["unused-async"]  # FastAPI exception handlers must be async
 "backend/app/main.py" = ["raise-without-from-inside-except", "fallible-context-manager"]  # lifespan pattern is correct for FastAPI

@@ -40,6 +40,11 @@ jobs:
       - name: Bootstrap
         run: make bootstrap
 
+      - name: Install project dependencies
+        run: |
+          source .venv/bin/activate
+          pip install --quiet -e .
+
       - name: Format Check
         run: make format-check
 
@@ -49,5 +54,90 @@ jobs:
       - name: Type Check
         run: make typecheck
 
+      # Task 6.14 — offline migration governance gate. Detects: syntax
+      # errors, multiple heads, head-vs-expected mismatch, non-linear
+      # chains, missing/broken/orphan revisions, ordering problems.
+      # Runs without a database (single source of truth:
+      # scripts/check_migrations.py).
+      - name: Migration Governance Gate (offline)
+        run: make db-gate
+
       - name: Test
         run: make test
+
+  migrations:
+    name: Database Migrations (TimescaleDB)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      timescaledb:
+        image: timescale/timescaledb:2.19.0-pg17
+        env:
+          POSTGRES_DB: hotelops
+          POSTGRES_USER: hotelops
+          POSTGRES_PASSWORD: CHANGE_ME
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hotelops -d hotelops"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      # Task 7 reliability pipeline (outbox publisher, ingress bridge,
+      # consumer dedup) transports events over Redis streams. Host port
+      # 6380 matches tests/integration/_task7_helpers.scratch_settings.
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Bootstrap
+        run: make bootstrap
+
+      - name: Install project dependencies
+        run: |
+          source .venv/bin/activate
+          pip install --quiet -e .
+
+      # Task 6.14 + Task 7 — database-backed verification against a
+      # fresh TimescaleDB + Redis: migration upgrade from empty state and
+      # from the previous expected head, alembic check drift (metadata
+      # compatibility / untracked schema changes), RLS, atomicity,
+      # roll-forward/downgrade recovery, and the full Task 7 reliability
+      # pipeline (transactional outbox, leasing, retry/backoff/dead-letter,
+      # inbox dedup, idempotency incl. concurrency, tenant/venue isolation,
+      # and the end-to-end flow). Scratch databases are created and dropped
+      # per test (see tests/integration/test_migrations.py).
+      - name: Migration + Task 7 reliability integration suite
+        env:
+          INTEGRATION_TESTS: "1"
+          DATABASE_URL: postgresql+asyncpg://hotelops:CHANGE_ME@localhost:5432/hotelops
+        run: |
+          source .venv/bin/activate
+          pytest tests/integration/test_migrations.py tests/integration/test_rls.py \
+            tests/integration/test_database_lifecycle.py tests/integration/test_outbox_publisher.py \
+            tests/integration/test_inbox_consumer.py tests/integration/test_idempotency_records.py \
+            tests/integration/test_reliability_flow_e2e.py -q
+
+      - name: Alembic heads and drift check
+        env:
+          DATABASE_URL: postgresql+asyncpg://hotelops:CHANGE_ME@localhost:5432/hotelops
+        run: |
+          source .venv/bin/activate
+          alembic -c database/alembic.ini heads
+          alembic -c database/alembic.ini upgrade head
+          alembic -c database/alembic.ini check

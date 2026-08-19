@@ -1,0 +1,144 @@
+{
+  "config": {
+    "confidence_threshold": 0.5,
+    "input_height": 480,
+    "input_width": 640,
+    "max_detections": 300,
+    "nms_iou_threshold": 0.45
+  },
+  "description": "Representative 4-frame sequence of a person walking across the frame.",
+  "frames": [
+    {
+      "expected": {
+        "detection_count": 1,
+        "detections": [
+          {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.9,
+            "x_max": 0.34375,
+            "x_min": 0.03125,
+            "y_max": 0.9166666666666666,
+            "y_min": 0.08333333333333333
+          }
+        ]
+      },
+      "image": "video_frame_0.png",
+      "index": 0,
+      "predictions": [
+        {
+          "class_id": 0,
+          "confidence": 0.9,
+          "x1": 20,
+          "x2": 220,
+          "y1": 40,
+          "y2": 440
+        }
+      ]
+    },
+    {
+      "expected": {
+        "detection_count": 1,
+        "detections": [
+          {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.9,
+            "x_max": 0.46875,
+            "x_min": 0.15625,
+            "y_max": 0.9166666666666666,
+            "y_min": 0.08333333333333333
+          }
+        ]
+      },
+      "image": "video_frame_1.png",
+      "index": 1,
+      "predictions": [
+        {
+          "class_id": 0,
+          "confidence": 0.9,
+          "x1": 100,
+          "x2": 300,
+          "y1": 40,
+          "y2": 440
+        }
+      ]
+    },
+    {
+      "expected": {
+        "detection_count": 1,
+        "detections": [
+          {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.9,
+            "x_max": 0.59375,
+            "x_min": 0.28125,
+            "y_max": 0.9166666666666666,
+            "y_min": 0.08333333333333333
+          }
+        ]
+      },
+      "image": "video_frame_2.png",
+      "index": 2,
+      "predictions": [
+        {
+          "class_id": 0,
+          "confidence": 0.9,
+          "x1": 180,
+          "x2": 380,
+          "y1": 40,
+          "y2": 440
+        }
+      ]
+    },
+    {
+      "expected": {
+        "detection_count": 1,
+        "detections": [
+          {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.9,
+            "x_max": 0.71875,
+            "x_min": 0.40625,
+            "y_max": 0.9166666666666666,
+            "y_min": 0.08333333333333333
+          }
+        ]
+      },
+      "image": "video_frame_3.png",
+      "index": 3,
+      "predictions": [
+        {
+          "class_id": 0,
+          "confidence": 0.9,
+          "x1": 260,
+          "x2": 460,
+          "y1": 40,
+          "y2": 440
+        }
+      ]
+    }
+  ],
+  "height": 480,
+  "kind": "video",
+  "model": {
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact_uri": "memory://golden/yolov8n.pt",
+    "class_names": [
+      "person",
+      "bag"
+    ],
+    "id": "yolo-person-detector",
+    "name": "yolov8n",
+    "version": "8.1.0"
+  },
+  "scene": "video",
+  "schema": "hotelops.detection-scene/1.0",
+  "tolerances": {
+    "abs": 1e-09,
+    "rel": 1e-09
+  },
+  "width": 640
+}

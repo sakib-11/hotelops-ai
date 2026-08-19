@@ -18,13 +18,16 @@ router: APIRouter = APIRouter(tags=["health"])
 async def health(settings: Settings = Depends(get_settings)) -> HealthResponse:
     """Liveness check.
 
-    Returns 200 if the application process is alive.
-    Does NOT check external dependencies.
+    Returns 200 with service, version, environment, and optional build
+    metadata. Does NOT check external dependencies.
     """
     return HealthResponse(
         status="ok",
         service=settings.app_name,
         version=settings.app_version,
+        environment=settings.app_env,
+        build_commit=settings.build_commit or None,
+        build_timestamp=settings.build_timestamp or None,
     )
 
 

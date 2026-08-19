@@ -15,6 +15,7 @@ from backend.app.infrastructure.health.models import (
 )
 from backend.app.infrastructure.redis.client import RedisClient
 from backend.app.infrastructure.storage.client import StorageClient
+from backend.app.infrastructure.storage.protocol import StoragePort
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class ReadinessService:
         self,
         database: DatabaseClient,
         redis: RedisClient,
-        storage: StorageClient,
+        storage: StoragePort | StorageClient,
     ) -> None:
         self._database = database
         self._redis = redis

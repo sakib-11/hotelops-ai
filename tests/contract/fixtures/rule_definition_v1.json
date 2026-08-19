@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "queue_candidate",
+  "rule_version": "v1",
+  "rule_name": "Queue candidate",
+  "description": "Detects a queue candidate in a configured waiting context.",
+  "enabled": true,
+  "input_fact_types": [
+    "waiting_interval"
+  ],
+  "configuration_requirements": [
+    "waiting_qualification_seconds"
+  ],
+  "evaluator_id": "queue_candidate_evaluator.v1",
+  "output_event_type": "queue_candidate",
+  "evidence_requirement": "required",
+  "cooldown_policy": {
+    "enabled": true,
+    "duration_seconds": 60.0
+  },
+  "deterministic_version": "0.2.0"
+}

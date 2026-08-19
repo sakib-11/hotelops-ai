@@ -34,6 +34,9 @@ from backend.app.infrastructure.database.models.identity import (
     UserModel,
     VenueModel,
 )
+from backend.app.infrastructure.database.models.integrations import (
+    METADATA_NO_SECRETS_FUNCTION_SQL,
+)
 from backend.app.infrastructure.database.repositories.identity import (
     TenantRepository,
     VenueRepository,
@@ -42,6 +45,8 @@ from contracts.common import TenantId, VenueId
 from contracts.identity import ActorContext, RoleName, permissions_for_role
 
 # Skip if INTEGRATION_TESTS not set
+pytestmark = [pytest.mark.integration]
+
 need_postgres = pytest.mark.skipif(
     not os.environ.get("INTEGRATION_TESTS"),
     reason="Set INTEGRATION_TESTS=1 and start PostgreSQL (docker compose -f infrastructure/docker/compose.yaml up -d postgres)",
@@ -68,6 +73,9 @@ async def seeded_session():
     e = create_async_engine(_DATABASE_URL, pool_size=1, max_overflow=0)
     factory = async_sessionmaker(e, expire_on_commit=False)
     async with e.begin() as conn:
+        # Migration 013 creates this helper; create_all-only fixtures must too
+        # (the integrations CHECK references it).
+        await conn.execute(text(METADATA_NO_SECRETS_FUNCTION_SQL))
         await conn.run_sync(Base.metadata.create_all)
     async with factory() as s:
         await _seed_data(s)

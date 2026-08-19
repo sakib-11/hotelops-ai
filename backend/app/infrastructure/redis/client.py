@@ -12,6 +12,7 @@ from typing import Self
 import redis.asyncio as aioredis
 
 from backend.app.infrastructure.config import Settings
+from backend.app.infrastructure.observability import tracing
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,21 @@ class RedisClient:
         logger.info("Redis client initialized")
         return self
 
+    @property
+    def client(self) -> aioredis.Redis:
+        """The underlying async Redis connection.
+
+        Lets higher layers (e.g. the Redis stream transport) reuse this
+        client's connection lifecycle instead of opening a second one.
+
+        Raises:
+            RuntimeError: If the client has not been initialized.
+        """
+        if self._client is None:
+            msg = "RedisClient is not initialized"
+            raise RuntimeError(msg)
+        return self._client
+
     async def check_connectivity(self) -> bool:
         """Check if Redis is reachable via PING.
 
@@ -51,12 +67,13 @@ class RedisClient:
         """
         if self._client is None:
             return False
-        try:
-            result = await self._client.ping()
-            return result is True
-        except Exception:
-            logger.exception("Redis connectivity check failed")
-            return False
+        async with tracing.redis_span("redis.check_connectivity") as _:
+            try:
+                result = await self._client.ping()
+                return result is True
+            except Exception:
+                logger.exception("Redis connectivity check failed")
+                return False
 
     async def close(self) -> None:
         """Close the Redis connection.

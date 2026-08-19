@@ -1,0 +1,40 @@
+.occupancy-card {
+  max-width: 560px;
+}
+
+.occupancy-card__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md) var(--spacing-lg);
+  margin: 0;
+}
+
+.occupancy-card__field {
+  margin: 0;
+  min-width: 0;
+}
+
+.occupancy-card__field--span {
+  grid-column: 1 / -1;
+}
+
+.occupancy-card__field dt {
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+}
+
+.occupancy-card__field dd {
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.occupancy-card__muted {
+  color: var(--color-text-tertiary);
+}

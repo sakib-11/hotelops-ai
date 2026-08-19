@@ -11,7 +11,7 @@ HAS_RUST := $(shell command -v cargo >/dev/null 2>&1 && echo yes || echo no)
 HAS_PYTHON := $(shell command -v python3 >/dev/null 2>&1 && echo yes || echo no)
 
 .DEFAULT_GOAL := check
-.PHONY: help bootstrap format format-check lint typecheck test check clean infra-up infra-down infra-status infra-logs infra-reset dev
+.PHONY: help bootstrap format format-check lint typecheck test check clean infra-up infra-down infra-status infra-logs infra-reset dev db-upgrade db-downgrade db-current db-heads db-history db-revision db-check db-gate db-integration worker-outbox worker-inbox worker-ingress task18-gate
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -25,7 +25,7 @@ bootstrap: ## Install/setup all project development tooling
 	@test -d .venv || python3 -m venv .venv
 	@source .venv/bin/activate
 	pip install --quiet --upgrade pip
-	pip install --quiet ruff mypy pytest pytest-cov pre-commit
+	pip install --quiet ruff mypy pytest pytest-cov pytest-asyncio pre-commit
 	@echo "[bootstrap] Python tools installed."
 
 	@if [ "$(HAS_NODE)" = "yes" ]; then
@@ -175,6 +175,71 @@ dev: ## Start FastAPI in development mode
 		echo "[dev] backend/app/main.py not found. Has Task 3 been implemented?"; \
 		exit 1; \
 	fi
+
+# =============================================================================
+# Database Migrations (Alembic)
+# =============================================================================
+
+# Database URL resolves via database/migrations/env.py (single configuration
+# system): explicit config value -> $DATABASE_URL -> Settings().
+ALEMBIC := .venv/bin/alembic -c database/alembic.ini
+
+db-upgrade: ## Apply all pending migrations
+	$(ALEMBIC) upgrade head
+
+db-downgrade: ## Revert to a previous revision (usage: make db-downgrade REV=001_create_identity_tables)
+	$(ALEMBIC) downgrade $(REV)
+
+db-current: ## Show the current database revision
+	$(ALEMBIC) current
+
+db-heads: ## Show available migration heads
+	$(ALEMBIC) heads
+
+db-history: ## Show the migration history
+	$(ALEMBIC) history
+
+db-revision: ## Create a new migration (usage: make db-revision MSG="add widget table")
+	$(ALEMBIC) revision -m "$(MSG)"
+
+db-check: ## Verify migrations match ORM metadata (drift check)
+	$(ALEMBIC) check
+
+db-gate: ## Migration governance gate (offline, no DB): syntax, single head, expected head, linear chain, ordering
+	.venv/bin/python scripts/check_migrations.py
+
+db-integration: ## Run DB-backed integration verification (migrations + RLS + Task 7 reliability; requires infra up: make infra-up)
+	INTEGRATION_TESTS=1 .venv/bin/pytest tests/integration/test_migrations.py tests/integration/test_rls.py tests/integration/test_database_lifecycle.py tests/integration/test_outbox_publisher.py tests/integration/test_inbox_consumer.py tests/integration/test_idempotency_records.py tests/integration/test_reliability_flow_e2e.py -q
+
+# =============================================================================
+# Task 7 Workers (transactional outbox / inbox / ingress bridge)
+# =============================================================================
+
+# Each worker is a separate process polling its own boundary; they must be
+# started once the API is running (workers + API share the same database and
+# Redis). See docs/architecture/task-7-outbox-inbox-idempotency.md.
+
+worker-outbox: ## Run the transactional outbox publisher (Task 7)
+	.venv/bin/python -m backend.app.workers.outbox_publisher
+
+worker-inbox: ## Run the inbox consumer (Task 7)
+	.venv/bin/python -m backend.app.workers.inbox_consumer
+
+worker-ingress: ## Run the Redis stream -> inbox ingress bridge (Task 7)
+	.venv/bin/python -m backend.app.workers.inbox_ingress
+
+worker-media-cleanup: ## Run the media retention + orphan cleanup worker (Task 9)
+	.venv/bin/python -m backend.app.workers.media_cleanup
+
+worker-evidence: ## Run the async evidence processing worker (Task 17.11)
+	.venv/bin/python -m backend.app.workers.evidence
+
+# =============================================================================
+# Task 18.20 — First Vertical Slice Enterprise Gate
+# =============================================================================
+
+task18-gate: ## Task 18.20 ENTERPRISE GATE: run every component suite + canonical checks and print the FINAL REPORT (exit 0 = Task 18 COMPLETE, 1 = BLOCKED)
+	.venv/bin/python scripts/task18_gate.py
 
 # =============================================================================
 # Cleanup

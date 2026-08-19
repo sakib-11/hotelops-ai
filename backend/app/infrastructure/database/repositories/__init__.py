@@ -9,8 +9,14 @@ from backend.app.infrastructure.database.repositories.identity import (
     TenantRepository,
     VenueRepository,
 )
+from backend.app.infrastructure.database.repositories.media import MediaRepository
+from backend.app.infrastructure.database.repositories.operational import OperationalRepository
+from backend.app.infrastructure.database.repositories.video import VideoSessionRepository
 
 __all__ = [
+    "MediaRepository",
+    "OperationalRepository",
     "TenantRepository",
     "VenueRepository",
+    "VideoSessionRepository",
 ]

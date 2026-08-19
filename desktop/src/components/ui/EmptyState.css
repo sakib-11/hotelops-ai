@@ -1,0 +1,158 @@
+.empty-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-md);
+}
+
+.empty-state--sm,
+.error-state--sm {
+  padding: var(--spacing-lg);
+  gap: var(--spacing-sm);
+}
+
+.empty-state--lg,
+.error-state--lg {
+  padding: var(--spacing-3xl);
+  gap: var(--spacing-lg);
+}
+
+.empty-state__icon,
+.error-state__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--border-radius-large);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.empty-state--sm .empty-state__icon,
+.error-state--sm .error-state__icon {
+  width: 48px;
+  height: 48px;
+}
+
+.empty-state--lg .empty-state__icon,
+.error-state--lg .error-state__icon {
+  width: 80px;
+  height: 80px;
+}
+
+.empty-state__icon svg,
+.error-state__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.empty-state--sm .empty-state__icon svg,
+.error-state--sm .error-state__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.empty-state--lg .empty-state__icon svg,
+.error-state--lg .error-state__icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.empty-state__title,
+.error-state__title {
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  margin: 0;
+}
+
+.empty-state--sm .empty-state__title,
+.error-state--sm .error-state__title {
+  font-size: var(--font-size-heading);
+}
+
+.empty-state--lg .empty-state__title,
+.error-state--lg .error-state__title {
+  font-size: var(--font-size-display);
+}
+
+.empty-state__description,
+.error-state__message {
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  max-width: 400px;
+}
+
+.empty-state--sm .empty-state__description,
+.error-state--sm .error-state__message {
+  font-size: var(--font-size-label);
+}
+
+.empty-state--lg .empty-state__description,
+.error-state--lg .error-state__message {
+  font-size: var(--font-size-body-large);
+}
+
+.error-state__code {
+  font-size: var(--font-size-caption);
+  font-family: var(--font-family-mono);
+  color: var(--color-text-tertiary);
+  margin: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--border-radius-small);
+}
+
+.error-state__action,
+.empty-state__action {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.error-state__dismiss {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  border-radius: var(--border-radius-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.error-state__dismiss:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.error-state__dismiss svg {
+  width: 18px;
+  height: 18px;
+}
+
+.error-state {
+  position: relative;
+  background-color: var(--color-status-error-light);
+  border: 1px solid var(--color-status-error);
+  border-radius: var(--border-radius-large);
+}
+
+.error-state__icon {
+  background-color: var(--color-status-error-light);
+  color: var(--color-status-error);
+}

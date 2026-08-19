@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "turnover_delay",
+  "rule_version": "v1",
+  "rule_name": "Turnover delay",
+  "description": "Raises a turnover-delay event when a table stays occupied beyond the configured service window.",
+  "enabled": true,
+  "input_fact_types": [
+    "occupancy_snapshot",
+    "dwell_interval"
+  ],
+  "configuration_requirements": [
+    "turnover_delay_seconds",
+    "service_window_seconds"
+  ],
+  "evaluator_id": "turnover_delay_evaluator.v1",
+  "output_event_type": "turnover_delay",
+  "evidence_requirement": "required",
+  "cooldown_policy": {
+    "enabled": true,
+    "duration_seconds": 300.0
+  },
+  "deterministic_version": "0.2.0"
+}

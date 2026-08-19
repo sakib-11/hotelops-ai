@@ -19,6 +19,7 @@ from contracts.common import (
     DetectionId,
     FrameId,
     TrackId,
+    VideoAssetId,
     VideoSessionId,
     validate_schema_version,
     validate_utc,
@@ -57,7 +58,7 @@ class BoundingBox(BaseModel, frozen=True):
 class DetectionObservation(BaseModel, frozen=True):
     """Deterministic detector output from a single frame.
 
-    Produced by detectors (e.g., YOLO). Represents what was detected,
+    Produced by a detector backend. Represents what was detected,
     not what it means.
     """
 
@@ -70,6 +71,19 @@ class DetectionObservation(BaseModel, frozen=True):
     confidence: float = Field(ge=0.0, le=1.0)
     bounding_box: BoundingBox
     event_time: datetime
+    # Provenance (additive, optional): the source/session/frame context the
+    # detection was produced from, copied verbatim from the FramePacket by
+    # the detector. Absent for observations predating this extension.
+    session_id: VideoSessionId | None = None
+    source_ref: VideoAssetId | None = None
+    frame_index: int | None = Field(default=None, ge=0)
+    # Class identity: numeric class ID as emitted by the model plus its
+    # human label (``class_name``). ``class_id`` is absent for
+    # observations predating this extension.
+    class_id: int | None = Field(default=None, ge=0)
+    # Image dimensions the normalized bounding box is relative to.
+    image_width: int | None = Field(default=None, ge=1)
+    image_height: int | None = Field(default=None, ge=1)
     detector_metadata: dict[str, Any] | None = None
 
     _validate_schema = field_validator("schema_version")(validate_schema_version)

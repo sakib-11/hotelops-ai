@@ -37,6 +37,23 @@ class SourceType(StrEnum):
     RECORDED = "recorded"
 
 
+class LiveVideoSessionStatus(StrEnum):
+    """Operational health state of a live video session.
+
+    These states track the ingestion pipeline health (connection, frames flowing,
+    reconnection), NOT the video event semantics. Event-time (capture_time, PTS)
+    is carried by FramePacket; this FSM uses system/processing time for
+    heartbeat, staleness detection, and operational lifecycle.
+    """
+
+    CONNECTING = "connecting"
+    ACTIVE = "active"
+    DEGRADED = "degraded"
+    RECONNECTING = "reconnecting"
+    STOPPED = "stopped"
+    FAILED = "failed"
+
+
 class VideoAsset(BaseModel, frozen=True):
     """An immutable/logical reference to a source video asset.
 

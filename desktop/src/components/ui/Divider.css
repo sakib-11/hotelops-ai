@@ -1,0 +1,105 @@
+.divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: var(--color-border-primary);
+}
+
+.divider--horizontal {
+  flex-direction: row;
+}
+
+.divider--vertical {
+  flex-direction: column;
+  height: 100%;
+}
+
+.divider__line {
+  flex: 1;
+  height: 1px;
+  width: 1px;
+  background-color: currentColor;
+}
+
+.divider--horizontal .divider__line {
+  height: 1px;
+  width: 100%;
+}
+
+.divider--vertical .divider__line {
+  height: 100%;
+  width: 1px;
+}
+
+/* Variants */
+.divider--default .divider__line {
+  background-color: var(--color-border-primary);
+  border-style: solid;
+}
+
+.divider--dashed .divider__line {
+  background-color: transparent;
+  border-top: 1px dashed var(--color-border-primary);
+  border-bottom: none;
+}
+
+.divider--dotted .divider__line {
+  background-color: transparent;
+  border-top: 1px dotted var(--color-border-primary);
+  border-bottom: none;
+}
+
+/* Thickness */
+.divider--thin .divider__line {
+  border-top-width: 1px;
+}
+
+.divider--medium .divider__line {
+  border-top-width: 2px;
+}
+
+.divider--thick .divider__line {
+  border-top-width: 3px;
+}
+
+/* With Label */
+.divider--with-label {
+  gap: var(--spacing-md);
+  white-space: nowrap;
+}
+
+.divider--with-label .divider__line {
+  flex: 1;
+}
+
+.divider--label-start .divider__label {
+  order: 0;
+}
+
+.divider--label-center .divider__label {
+  order: 1;
+}
+
+.divider--label-end .divider__label {
+  order: 2;
+}
+
+.divider__label {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  flex-shrink: 0;
+  padding: 0 var(--spacing-sm);
+}
+
+/* Vertical divider with label */
+.divider--vertical.divider--with-label {
+  gap: var(--spacing-sm);
+}
+
+.divider--vertical .divider__line {
+  height: 100%;
+  width: 1px;
+}

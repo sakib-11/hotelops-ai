@@ -1,0 +1,36 @@
+{
+  "config": {
+    "confidence_threshold": 0.5,
+    "input_height": 480,
+    "input_width": 640,
+    "max_detections": 300,
+    "nms_iou_threshold": 0.45
+  },
+  "description": "An empty scene \u2014 the model emits no detections.",
+  "expected": {
+    "detection_count": 0,
+    "detections": []
+  },
+  "height": 480,
+  "image": "empty.png",
+  "kind": "image",
+  "model": {
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact_uri": "memory://golden/yolov8n.pt",
+    "class_names": [
+      "person",
+      "bag"
+    ],
+    "id": "yolo-person-detector",
+    "name": "yolov8n",
+    "version": "8.1.0"
+  },
+  "predictions": [],
+  "scene": "empty",
+  "schema": "hotelops.detection-scene/1.0",
+  "tolerances": {
+    "abs": 1e-09,
+    "rel": 1e-09
+  },
+  "width": 640
+}

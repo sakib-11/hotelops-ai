@@ -22,13 +22,16 @@ from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import (
+    CheckConstraint,
     Column,
     DateTime,
     Enum,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     String,
     Table,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -56,6 +59,8 @@ _MEMBERSHIP_SCOPES = ("all_venues", "specific_venues")
 class TenantModel(Base):
     __tablename__ = "tenants"
 
+    __table_args__ = (CheckConstraint("length(btrim(name)) > 0", name="ck_tenants_name_not_empty"),)
+
     tenant_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -66,6 +71,7 @@ class TenantModel(Base):
         Enum(*_TENANT_STATUSES, name="tenant_status"),
         nullable=False,
         default="active",
+        server_default="active",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -97,6 +103,11 @@ class TenantModel(Base):
 class VenueModel(Base):
     __tablename__ = "venues"
 
+    __table_args__ = (
+        UniqueConstraint("venue_id", "tenant_id", name="uq_venues_venue_tenant"),
+        CheckConstraint("length(btrim(name)) > 0", name="ck_venues_name_not_empty"),
+    )
+
     venue_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -113,6 +124,7 @@ class VenueModel(Base):
         Enum(*_VENUE_STATUSES, name="venue_status"),
         nullable=False,
         default="active",
+        server_default="active",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -144,6 +156,11 @@ class VenueModel(Base):
 class UserModel(Base):
     __tablename__ = "users"
 
+    __table_args__ = (
+        CheckConstraint("length(btrim(display_name)) > 0", name="ck_users_display_name_not_empty"),
+        CheckConstraint("email LIKE '%@%'", name="ck_users_email_has_at"),
+    )
+
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -155,6 +172,7 @@ class UserModel(Base):
         Enum(*_USER_STATUSES, name="user_status"),
         nullable=False,
         default="active",
+        server_default="active",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -265,7 +283,10 @@ role_permissions = Table(
 class MembershipModel(Base):
     __tablename__ = "memberships"
 
-    __table_args__ = (Index("ix_memberships_tenant_user", "tenant_id", "user_id"),)
+    __table_args__ = (
+        Index("ix_memberships_tenant_user", "tenant_id", "user_id"),
+        UniqueConstraint("membership_id", "tenant_id", name="uq_memberships_membership_tenant"),
+    )
 
     membership_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -294,11 +315,13 @@ class MembershipModel(Base):
         Enum(*_MEMBERSHIP_SCOPES, name="membership_scope"),
         nullable=False,
         default="all_venues",
+        server_default="all_venues",
     )
     status: Mapped[str] = mapped_column(
         Enum(*_MEMBERSHIP_STATUSES, name="membership_status"),
         nullable=False,
         default="active",
+        server_default="active",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -311,6 +334,11 @@ class MembershipModel(Base):
     user: Mapped[UserModel] = relationship(back_populates="memberships")
     tenant: Mapped[TenantModel] = relationship(back_populates="memberships")
     role: Mapped[RoleModel] = relationship(back_populates="memberships")
+    # NOTE: the secondary join now includes tenant_id (composite FKs from
+    # migration 003), so membership_venues rows require an explicit
+    # tenant_id. Reads derive it correctly; writes through this
+    # relationship must supply the membership's tenant — a cross-tenant
+    # venue is rejected by the composite FK at the database.
     venues: Mapped[list[VenueModel]] = relationship(
         secondary="membership_venues",
         back_populates="memberships",
@@ -330,17 +358,23 @@ class MembershipModel(Base):
 membership_venues = Table(
     "membership_venues",
     Base.metadata,
-    Column(
-        "membership_id",
-        UUID(as_uuid=True),
-        ForeignKey("memberships.membership_id", ondelete="CASCADE"),
-        primary_key=True,
+    Column("membership_id", UUID(as_uuid=True), primary_key=True),
+    Column("venue_id", UUID(as_uuid=True), primary_key=True),
+    # Denormalized tenant (FK-derived). Composite FKs below guarantee a
+    # membership can only be linked to venues of its own tenant — the
+    # Task 6.3 "no cross-tenant venue scope" invariant.
+    Column("tenant_id", UUID(as_uuid=True), nullable=False),
+    ForeignKeyConstraint(
+        ["membership_id", "tenant_id"],
+        ["memberships.membership_id", "memberships.tenant_id"],
+        ondelete="CASCADE",
+        name="fk_membership_venues_membership_tenant",
     ),
-    Column(
-        "venue_id",
-        UUID(as_uuid=True),
-        ForeignKey("venues.venue_id", ondelete="CASCADE"),
-        primary_key=True,
+    ForeignKeyConstraint(
+        ["venue_id", "tenant_id"],
+        ["venues.venue_id", "venues.tenant_id"],
+        ondelete="CASCADE",
+        name="fk_membership_venues_venue_tenant",
     ),
     # Composite index for efficient venue-scoped membership lookups
     Index("ix_membership_venues_venue", "venue_id"),

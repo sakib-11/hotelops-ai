@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "session_id": "00000000-0000-0000-0000-000000000002",
+  "track_id": "00000000-0000-0000-0000-000000000020",
+  "frame_id": "00000000-0000-0000-0000-000000000001",
+  "event_time": "2026-07-29T12:00:05+00:00",
+  "camera_id": "00000000-0000-0000-0000-000000000130",
+  "configuration_version_id": "00000000-0000-0000-0000-000000000131",
+  "spatial_point": {
+    "x": 0.5,
+    "y": 0.9,
+    "coordinate_space": "image_normalized",
+    "policy": "footpoint"
+  },
+  "status": "inside",
+  "zone_profile_id": "zone-lobby",
+  "table_profile_id": null,
+  "engine_version": "0.1.0"
+}

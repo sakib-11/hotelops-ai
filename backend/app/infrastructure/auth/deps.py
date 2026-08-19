@@ -11,7 +11,7 @@ Authorization (tenant/role/permissions) is resolved separately.
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from typing import Any
 
 from fastapi import Depends
@@ -25,6 +25,14 @@ from backend.app.infrastructure.auth.exceptions import (
 )
 from backend.app.infrastructure.auth.service import AuthService, TokenData
 from backend.app.infrastructure.config import Settings
+from backend.app.infrastructure.observability import tracing
+from backend.app.infrastructure.observability.context import (
+    bind_actor_context,
+    unbind,
+)
+from backend.app.infrastructure.observability.context import (
+    venue_id as current_venue_id,
+)
 from contracts.identity import ActorContext, Permission
 
 logger = logging.getLogger(__name__)
@@ -166,12 +174,33 @@ def require_any_permission(*permissions: Permission) -> Callable[..., Any]:
 
 async def get_actor_context(
     token_data: TokenData = Depends(get_token_data),
-) -> ActorContext:
-    """Resolve the ActorContext from a verified token.
+) -> AsyncIterator[ActorContext]:
+    """Resolve the ActorContext from a verified token (Task 5).
+
+    Generator dependency: while the request is being served, the
+    server-validated actor identity (actor_id, tenant_id, and the
+    venue when unambiguous) is bound to the task-local observability
+    context so structured logs carry it automatically (Task 8.5). The
+    context is ALWAYS unbound when the request finishes — even on
+    exceptions — so tenant/actor context can never leak into the next
+    request.
 
     In production, this would inject real lookup callables from
     the repository layer. Currently returns a minimal ActorContext
     with default operator role when no lookups are configured.
     """
     builder = ActorContextBuilder()
-    return builder.build(token_data)
+    actor = builder.build(token_data)
+    tokens = bind_actor_context(actor)
+    # Attach the server-validated identity to the active span (Task 8.7):
+    # actor/tenant/venue are trusted values only, and the venue is set
+    # only when unambiguous (same rule as bind_actor_context).
+    tracing.set_current_span_attributes(
+        actor_id=str(actor.actor_id),
+        tenant_id=str(actor.tenant_id),
+        venue_id=current_venue_id(),
+    )
+    try:
+        yield actor
+    finally:
+        unbind(tokens)

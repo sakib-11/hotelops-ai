@@ -44,7 +44,7 @@ logs/
 # --- Media / Data ---
 uploads/
 local-recordings/
-evidence/
+/evidence/
 *.mp4
 *.avi
 *.mov

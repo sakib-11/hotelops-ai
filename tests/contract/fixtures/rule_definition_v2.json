@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "rule_id": "queue_candidate",
+  "rule_version": "v2",
+  "rule_name": "Queue candidate",
+  "description": "Queue-candidate semantics v2: stricter evidence and an additional queue-capacity configuration requirement.",
+  "enabled": true,
+  "input_fact_types": [
+    "waiting_interval",
+    "occupancy_snapshot"
+  ],
+  "configuration_requirements": [
+    "waiting_qualification_seconds",
+    "queue_max_length"
+  ],
+  "evaluator_id": "queue_candidate_evaluator.v2",
+  "output_event_type": "queue_candidate",
+  "evidence_requirement": "required",
+  "cooldown_policy": {
+    "enabled": true,
+    "duration_seconds": 120.0
+  },
+  "deterministic_version": "0.2.0"
+}

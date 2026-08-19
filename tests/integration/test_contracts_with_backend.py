@@ -24,6 +24,8 @@ from contracts.operations import ActionCommand
 from contracts.video import FramePacket
 from contracts.vision import BoundingBox, DetectionObservation
 
+pytestmark = [pytest.mark.integration]
+
 # =============================================================================
 # Test Setup — Minimal FastAPI app that doesn't need Postgres/Redis/MinIO
 # =============================================================================

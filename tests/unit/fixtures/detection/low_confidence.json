@@ -1,0 +1,71 @@
+{
+  "config": {
+    "confidence_threshold": 0.5,
+    "input_height": 480,
+    "input_width": 640,
+    "max_detections": 300,
+    "nms_iou_threshold": 0.45
+  },
+  "description": "One above-threshold and two below-threshold detections (confidence behavior).",
+  "expected": {
+    "detection_count": 1,
+    "detections": [
+      {
+        "class_id": 0,
+        "class_name": "person",
+        "confidence": 0.72,
+        "x_max": 0.46875,
+        "x_min": 0.015625,
+        "y_max": 0.9375,
+        "y_min": 0.020833333333333332
+      }
+    ]
+  },
+  "height": 480,
+  "image": "low_confidence.png",
+  "kind": "image",
+  "model": {
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "artifact_uri": "memory://golden/yolov8n.pt",
+    "class_names": [
+      "person",
+      "bag"
+    ],
+    "id": "yolo-person-detector",
+    "name": "yolov8n",
+    "version": "8.1.0"
+  },
+  "predictions": [
+    {
+      "class_id": 0,
+      "confidence": 0.72,
+      "x1": 10,
+      "x2": 300,
+      "y1": 10,
+      "y2": 450
+    },
+    {
+      "class_id": 1,
+      "confidence": 0.49,
+      "x1": 400,
+      "x2": 600,
+      "y1": 50,
+      "y2": 300
+    },
+    {
+      "class_id": 0,
+      "confidence": 0.31,
+      "x1": 10,
+      "x2": 200,
+      "y1": 400,
+      "y2": 470
+    }
+  ],
+  "scene": "low_confidence",
+  "schema": "hotelops.detection-scene/1.0",
+  "tolerances": {
+    "abs": 1e-09,
+    "rel": 1e-09
+  },
+  "width": 640
+}
